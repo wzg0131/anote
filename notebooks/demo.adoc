@@ -1,0 +1,477 @@
+= Demo: learn adoc
+Jerry Wong <wzg0131@gmail.com>
+:description: The document's description. \
+line2
+:revnumber: v1.0
+:revdate: 2022年12月12日
+:revremark: 学习如何使用adoc
+:sectanchors:
+:url-repo: https://wzg0131.github.com
+:toc:
+:sectnums:
+:sectnumlevels: 3
+//附录前缀
+:appendix-caption: 附录
+//例子前缀
+:example-caption: 例子
+//图片前缀
+:figure-caption!:
+:tip-caption: 提示
+:note-caption: 注意
+//:hardbreaks-option:
+:hide-uri-scheme:
+//图标：image(默认,默认地址是./images/icons/),font
+:icons!:
+
+//顶部锚点,也可以写成ID [#top]
+[[top]]
+
+
+//摘要块
+[abstract]
+.摘要
+摘要块~
+
+//摘要章节，没有章节号
+[abstract]
+== 摘要
+[quote,我说的]
+人和程序有一个能跑就行。
+
+== demo学习
+=== 段落样式
+
+
+//其他还有 IMPORTANT WARNING CAUTION
+NOTE: 这是个注意事项！
+
+[TIP]
+这是个提示~
+
+AsciiDoc 中的段落不需要任何特殊标记。一个段落只是一行或多行连续的文本。
+
+//演示换行
+要开始一个新段落，请至少用一个空行将其与前一个段落或块分开， +
+硬换行，还是属于一个段落；
+如果开启``:hardbreaks-option:``,就不需要+也能换行
+
+//突出样式
+[.lead]
+拥有lead角色的段落
+
+//无样式段落
+[.normal]
+normal角色的段落，不会有任何样式
+
+[.text-center]
+居中样式的段落
+//[.text-right]
+//居右
+
+
+=== blocks
+
+//或者样式[sidecar]
+[#sidecar.black]
+.侧边栏
+****
+//分离式标题对于在其他区块内制作标题非常有用，比如这个侧边栏。
+[discrete.blue]
+== 离散标题
+aaa
+****
+
+//源码,indent设置缩进
+[source#demo-code,java,indent=2]
+----
+public class Demo {
+    int id;
+}
+----
+.源码高亮
+****
+.设置属性
+----
+:source-highlighter: <value:[CodeRay,highlight.js,Pygments,Rouge]>
+:source-language: java
+:source-indent: 2
+----
+TIP: source块样式和属性在 https://docs.asciidoctor.org/asciidoc/latest/verbatim/source-blocks[*source-blocks*,role=green],
+https://docs.asciidoctor.org/asciidoc/latest/attributes/document-attributes-ref/#source-highlighting-and-formatting-attributes[*source-highlighting*,role=yellow]
+****
+
+.例子块
+====
+这是一个例子
+====
+
+.文字块
+....
+aaa
+    bbb
+....
+
+//样式有:square circle disc none unstyled
+[square]
+.无序列表
+* 无序1
+** 无序1-1
+** 无序1-2
+* 无序2
+
+//注释可以强制拆分列表
+
+.有序列表
+1. 有序1
+2. 有序2
+
+[start=3]
+.自动有序列表
+. 自动3
+. 自动4
+
+.列表延续例子:
+====
+使用单独一行的``+``号拼接**段落,块,块宏**在同一个列表项中:
+
+. 列表项1
++
+--
+如果有多个块,将块都包装在``open块(一对'--')``中,这样只需要使用一个+号。
+----
+文字块1
+----
+----
+文字块2
+----
+--
+. 列表项2
++
+--
+也可以通过include指令引入一个外部adoc文件到open块中:
+``include::other.adoc[]``
+--
+====
+
+//[%interactive]交互
+.清单
+* [*] checked
+* [x] also checked
+* [ ] not checked
+
+.引用
+[quote,我说的]
+使用引用样式属性的段落。
+
+.说明列表
+jerry:: 鼠
+tom:: 猫
+
+.问答列表
+[qanda]
+How are you?::
+I fine thank you and you i find too.
+
+.表格
+|===
+|Header 1 |Header 2 |Header 3 |Header 4
+
+|Column 1, row 1
+|Column 2, row 1
+|Column 3, row 1
+|Column 4, row 1
+
+|Column 1, row 2
+|Column 2, row 2
+|Column 3, row 2
+|Column 4, row 2
+|===
+
+
+=== 文本样式
+
+普通
+**加粗**
+__斜体__
+``等宽(用于显示终端命令行)``
+``++文字等宽++``
+##高亮##
+~下~标
+^上^标
+
+.使用内置样式:
+====
+.格式:
+----
+[.underline]#下划线#
+----
+内置的几个样式角色有:
+
+. [.small]#变小#
+. [.underline]#下划线#
+. [.overline]#overline#
+. [.line-through]#line-through#
+. [.nobreak]#nobreak#
+. [.nowrap]#nowrap#
+. [.pre-wrap]#pre-wrap#
+====
+
+=== breaks
+
+分割线:
+
+'''
+
+分页符:
+
+<<<
+
+=== links
+
+==== 自定链接
+Asciidoctor Project主页: https://www.asciidoctor.org +
+我的邮箱: wzg0131@gmail.com +
+防止自动连接加转义符号: \https://docs.asciidoctor.org
+
+[#macro-link]
+==== 链接宏
+
+* 在url后面加[],就将URL升级成URL宏：
++
+----
+https://asciidoctor.org[]
+----
+
+* 邮箱宏:
++
+----
+mailto:join@discuss.example.org[mailto宏,role=email]
+----
+
+* 更通用的链接宏:
++
+----
+link:<target>[<attrlist>]
+----
+链接文件:
+link:demo.adoc[当前文件] +
+链接锚点:
+link:#top[TOP,role=teal]
+
+* 定位到一个空白窗口:
++
+--
+* 命名属性方式：
+``window=_blank``
+* 速记简化方式：
+``^``
+====
+https://baidu.com["新窗口1",role=button,window=_blank,opts=nofollow]
+//存在别的命名属性，^需要放在""中
+https://baidu.com["新窗口2^",role=button]
+https://baidu.com[新窗口3^]
+https://baidu.com["当前窗口",role=button,opts=nofollow]
+====
+--
+
+[TIP]
+查看链接宏的属性: https://docs.asciidoctor.org/asciidoc/latest/macros/link-macro-ref[*link-macro-ref*^,role=green]
+
+NOTE: 1. 目标如果有空格等字符,需要先URL编码。 +
+2. 只有在必要时才应使用链接宏，否则只会增加冗长。
+
+=== 引用xref
+
+* 文档内部引用
+--
+通过``\<<id/锚点>>``的方式引用。 +
+例如: <<macro-link>> <<macro-link, 换个名字>>
+--
+
+* 跨文档引用
+
+.使用xref引用外部文档的锚点
+----
+Refer to xref:document-b.adoc#section-b[Section B] for more information.
+----
+例子:
+xref:nested.adoc[xrefstyle=short]
+
+=== 脚注footnote 和标注
+==== 脚注
+* 直接使用
++
+--
+.语法
+----
+wordfootnote:[text]
+word{empty}footnote:[text]
+----
+例子:
+hifootnote:[脚注1]
+--
+
+* 通过文档属性
++
+--
+.语法
+----
+:fn-test: footnote:[text]
+hello{fn-test}
+----
+例子:
+
+:fn-test: footnote:[脚注2]
+hello{fn-test}
+--
+
+==== 标注
+[source,java]
+----
+public class Demo2 {
+    int id;
+}<1>
+----
+<1> 这是一个标注
+
+=== 图片 images
+两种图片宏类型: 块和内联。块形式使用两个冒号 (`` ::``)，而内联形式只使用一个 (`` :``)。
+
+* 块图片宏
++
+--
+.语法
+----
+[attrs]
+image::location[text,width,height]
+----
+
+[#miao33,link=https://github.com/wzg0131,title=wzg0131]
+image::https://avatars.githubusercontent.com/u/39430789[cat,200,200]
+
+--
+
+* 内联图片宏
++
+Click image:https://avatars.githubusercontent.com/u/39430789[title="wzg0131",width=20,link=https://github.com/wzg0131] and goto my github.
+
+==== 设置图片目录
+----
+:imagesdir: images
+----
+
+==== 样式
+----
+块:
+[.right.text-center]
+image::tiger.png[Tiger,200,200]
+image::tiger.png[Tiger,200,200,float="right",align="center"]
+内联:
+image:sunset.jpg[Sunset,150,150,role=right]
+----
+NOTE: 在 https://docs.asciidoctor.org/asciidoc/latest/macros/image-ref/[*image-ref*,role=green] 查看更多用法
+
+=== include指令
+将另一个文件的内容包含到当前的 AsciiDoc 文档中。include 指令是一个预处理器指令，这意味着它不知道周围的上下文。尽管 include 指令看起来像块宏，但它不是宏。
+
+include 指令执行简单的文件合并，因此它适用于任何文本文件。所有包含内容的内容都已规范化。这意味着编码被强制为 UTF-8
+
+[source,asciidoc]
+.语法
+----
+\include::target[leveloffset= offset ,lines= ranges ,tag(s)= name(s) ,indent= depth ,opts=optional]
+----
+
+.把一些设置和变量放在专门的adoc引入：
+====
+----
+= Document Title
+Author Name
+\include::attributes-settings.adoc[]
+\include::attributes-urls.adoc[]
+:url-example: https://example.org
+
+Document body.
+----
+====
+
+.设置目录变量和引入源码：
+====
+.设置目录变量
+----
+:includedir: _includes
+:sourcedir: ../src/main/java
+
+\include::{includedir}/fragment1.adoc[]
+----
+.引入源码码
+[source,asciidoc]
+----
+\include::{sourcedir}/com/example/Application.java[]
+----
+====
+
+
+//引入另一个文档
+include::nested.adoc[leveloffset=3]
+
+=== 条件指令
+预处理器指令。表示定义或未定义某个属性时执行才插入内容。
+
+==== ifdef和ifndef
+.语法
+----
+\ifdef::attr1[]
+当attr1属性设置的时候才显示。
+\endif::[]
+
+简化:
+\ifdef::attr1[当attr1属性设置的时候才显示。]
+
+多个条件:
+或: 使用,分隔
+且: 使用+分隔
+----
+
+.ifdef指令
+====
+ifdef::revnumber[]
+当前文档版本: {revnumber}
+endif::[]
+====
+
+==== ifeval
+.语法
+----
+\ifeval::[<condition>]
+conditional content
+\endif::[]
+----
+
+.ifeval指令
+====
+ifeval::["{revnumber}" == "v1.0"]
+当前文档版本: {revnumber}
+endif::[]
+====
+
+
+== 章节2
+
+//附录必须是一级章节
+[appendix]
+== 附录1
+=== asciiDoc参考
+语法: https://docs.asciidoctor.org/asciidoc/latest/syntax-quick-reference[*syntax-quick-reference*,role=green]
+
+文档属性: https://docs.asciidoctor.org/asciidoc/latest/attributes/document-attributes-ref[*document-attributes-ref*,role=green]
+
+字符替换: https://docs.asciidoctor.org/asciidoc/latest/attributes/character-replacement-ref[*character-replacement-ref*,role=green]
+
+=== 内容2
+
+[appendix]
+== 附录2
+
+[bibliography]
+== 引用/参考

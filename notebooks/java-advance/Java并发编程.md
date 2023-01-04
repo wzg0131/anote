@@ -605,17 +605,289 @@ NOTE: Hasen 模型和Hoare 模型保证了等待的线程一定会被通知到�
 
 
 
-## JAVA线程基础
+### 线程
 
-### Java线程的生命周期
+#### 通用的线程生命周期
+
+![image-20230104141825073](./images/Java%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/image-20230104141825073.png)
+
+1. **初始状态**，指的是线程已经被创建，但是还不允许分配 CPU 执行。这个状态属于编程语言特有的，不过这里所谓的被创建，仅仅是在编程语言层面被创建，**而在操作系统层面，真正的线程还没有创建**。
+2. **可运行状态**，指的是线程可以分配 CPU 执行。在这种状态下，真正的操作系统线程已经被成功创建了，所以可以分配 CPU 执行。
+3. 当有空闲的 CPU 时，操作系统会将其分配给一个处于可运行状态的线程，被分配到 CPU 的线程的状态就转换成了**运行状态**。
+4. <u>运行状态的线程如果调用一个阻塞的 API（例如以阻塞方式读文件）或者等待某个事件（例如条件变量），那么线程的状态就会转换到**休眠状态**，==同时释放 CPU 使用权==，休眠状态的线程永远没有机会获得 CPU 使用权。当等待的事件出现了，线程就会从休眠状态转换到可运行状态。</u>
+5. 线程执行完或者出现异常就会进入**终止状态**，终止状态的线程不会切换到其他任何状态，进入终止状态也就意味着线程的生命周期结束了。
+
+Java 语言里则把可运行状态和运行状态合并了，这两个状态在操作系统调度层面有用，而 JVM 层面不关心这两个状态，因为 JVM 把线程调度交给操作系统处理了。
+
+#### JAVA中线程的生命周期
+
+JAVA线程可以处于以下状态之一：
+
+- **NEW** 
+
+  尚未启动的线程处于此状态。
+
+- **RUNNABLE** 
+
+  可运行线程的线程状态。处于可运行状态的线程正在 Java 虚拟机中执行，<u>但它可能正在等待来自操作系统的其他资源</u>，例如处理器。
+
+- **BLOCKED** 
+
+  阻塞等待监视器锁的线程的线程状态。处于阻塞状态的线程**正在等待监视器锁进入同步块/方法**或在调用`Object.wait()`(后重新进入同步块/方法。
+
+- **WAITING** 
+
+  等待线程的线程状态。由于调用以下方法之一，线程处于等待状态：
+
+  - `Object.wait()`
+
+  - `Thread.join()`
+
+  - `LockSupport.park()`
+
+    处于等待状态的线程正在等待另一个线程执行特定操作。例如，已对某个对象调用`Object.wait()`的线程正在等待另一个线程对该对象调用`Object.notify()`或`Object.notifyAll()` ;调用`Thread.join()`的线程正在等待指定线程终止。
+
+- **TIMED_WAITING** 
+
+  具有指定**等待时间**的等待线程的线程状态。线程由于调用了以下方法之一而处于定时等待状态，并具有指定的正等待时间：
+
+  - `Thread.sleep(millis)`
+  - `Object.wait(timeout)`
+  - `Thread.join(millis)`
+  - `LockSupport.parkNanos(blocker, deadline)`
+  - `LockSupport.parkUntil(deadline)`
+
+- **TERMINATED** 
+
+  已退出的线程处于此状态。
+
+在操作系统层面，Java 线程中的 BLOCKED、WAITING、TIMED_WAITING 是一种状态，即前面我们提到的休眠状态。也就是说只要 Java 线程处于这三种状态之一，那么这个线程就永远没有 CPU 的使用权。
+
+![image-20230104143408691](./images/Java%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/image-20230104143408691.png)
+
+##### RUNNABLE 与 BLOCKED 的状态转换
+
+只有线程等待 synchronized 的隐式锁这种场景会转换成BLOCKED。
+
+<u>线程**调用阻塞式 API** 时，是否会转换到 BLOCKED 状态呢？</u>
+
+**在操作系统层面，线程是会转换到*休眠状态*的**，但是**在 JVM 层面，Java 线程的状态不会发生变化，也就是说 Java 线程的状态会依然保持 *RUNNABLE 状态***。**JVM 层面并不关心操作系统调度相关的状态**，因为在 JVM 看来，等待 CPU 使用权（操作系统层面此时处于可执行状态）与等待 I/O（操作系统层面此时处于休眠状态）没有区别，都是在等待某个资源，所以都归入了 RUNNABLE 状态。
+
+而我们平时所谓的 Java 在调用阻塞式 API 时，线程会阻塞，指的是操作系统线程的状态，并不是 Java 线程的状态。
 
 
 
+##### 从 NEW 到 RUNNABLE 状态
+
+NEW 状态的线程，不会被操作系统调度。当调用`Thread.start()`后转换为RUNABLE。
+
+```java
+    //java.lang.Thread#start
+	public synchronized void start() {
+        if (threadStatus != 0)//state "NEW"
+            throw new IllegalThreadStateException();
+
+        group.add(this);
+
+        boolean started = false;
+        try {
+            start0();
+            started = true;
+        } finally {
+            try {
+                if (!started) {
+                    group.threadStartFailed(this);
+                }
+            } catch (Throwable ignore) {
+                /* do nothing. If start0 threw a Throwable then
+                  it will be passed up the call stack */
+            }
+        }
+    }
+	//由虚拟机实现，调用操作系统的线程API创建真正的线程
+	private native void start0();
+```
+
+##### 从 RUNNABLE 到 TERMINATED 状态
+
+线程**执行完`run()`方法**或者**执行过程抛出异常**都会导致终止。<u>Thread提供了两个方法用于中断`run()`的执行：</u>
+
+- **stop()** 已废弃
+
+  `stop()` 方法强制停止线程。使用 Thread.stop 停止线程会导致它解锁所有已锁定的监视。如果之前受这些监视器保护的任何对象处于不一致状态，则损坏的对象对其他线程可见，可能导致任意行为。
+
+- **interrupt()**
+
+  `interrupt()` 方法仅仅是通知线程，线程有机会执行一些后续操作，同时也可以无视这个通知。<u>被 interrupt 的线程，是怎么收到通知的呢？</u>一种是**异常**，另一种是**主动检测**。
+
+  - **当线程 A 处于 WAITING、TIMED_WAITING 状态时，如果其他线程调用线程 A 的 interrupt() 方法**，会使线程 A 返回到 RUNNABLE 状态，同时线程 A 的代码会**触发 InterruptedException 异常**。上面我们提到转换到 WAITING、TIMED_WAITING 状态的触发条件，都是调用了类似 `wait()`、`join()`、`sleep()` 这样的方法，我们看这些方法的签名，发现都会 throws InterruptedException 这个异常。这个异常的触发条件就是：其他线程调用了该线程的 interrupt() 方法。
+  - 当线程 A 处于 RUNNABLE 状态时，并且阻塞在 java.nio.channels.InterruptibleChannel 上时，如果其他线程调用线程 A 的 interrupt() 方法，线程 A 会触发 java.nio.channels.ClosedByInterruptException 这个异常；而阻塞在 java.nio.channels.Selector 上时，如果其他线程调用线程 A 的 interrupt() 方法，线程 A 的 java.nio.channels.Selector 会立即返回。
+  - 上面这两种情况属于被中断的线程通过异常的方式获得了通知。还有一种是**主动检测**，如果线程处于 RUNNABLE 状态，并且没有阻塞在某个 I/O 操作上，例如中断计算圆周率的线程 A，这时就得依赖线程 A 主动检测中断状态了。**如果其他线程调用线程 A 的 interrupt() 方法，那么线程 A 可以通过 isInterrupted() 方法，检测是不是自己被中断了**。
+
+##### InterruptedException 
+
+在触发 InterruptedException 异常的同时，JVM 会同时**把线程的中断标志位清除**，所以这个时候`th.isInterrupted()`返回的是 `false`。
 
 
 
+#### 线程问题排查工具
+
+jstack
+
+Java VisualVM
 
 
+
+#### 创建多少线程才是合适的？
+
+在并发编程领域，提升性能本质上就是提升硬件的利用率，再具体点来说，就是提升 I/O 的利用率和 CPU 的利用率。操作系统解决硬件利用率问题的对象往往是单一的硬件设备，而我们的并发程序，往往需要 CPU 和 I/O 设备相互配合工作，也就是说，**我们需要解决 CPU 和 I/O 设备综合利用率的问题**。解决方法就是多线程。
+
+线程也不是越多越好，线程切换需要成本。
+
+- CPU密集型程序
+
+  理论上纯计算的应用，每个逻辑核心一个线程就是最优的，再多创建的线程也只会增加线程切换的成本，不过在工程上，线程的数量一般会设置为“**CPU 核数 +1**”，这样的话，当线程因为偶尔的内存页失效或其他原因导致阻塞时，这个额外的线程可以顶上，从而保证 CPU 的利用率。
+
+- IO密集型程序
+
+  IO密集型需要评估CPU计算和I/O操作的耗时比，最佳线程数 =CPU 核数 * [ 1 +（I/O 耗时 / CPU 耗时）]
+
+如果一台机器跑了多个程序，每个程序都有自己的线程池，需要根据实际情况确定。
+
+
+
+#### 线程调用栈
+
+每个线程都有自己独立的调用栈：
+
+![image-20230104171914745](./images/Java%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/image-20230104171914745.png)
+
+**局部变量是放到调用栈里的，不会和其他线程共享，所以线程安全（线程封闭技术）**：
+
+![image-20230104172038735](./images/Java%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/image-20230104172038735.png)
+
+### 如何用面向对象思想写好并发程序
+
+#### 封装共享变量
+
+将共享变量作为对象属性封装在内部，对所有公共方法制定并发访问策略；对共享变量进行封装，要避免“逸出”，所谓“逸出”简单讲就是共享变量逃逸到对象的外面。
+
+对于不会发生变化的共享变量，用 final 关键字来避免并发问题。
+
+```java
+public class Counter {
+    private static final long MAX = 10000;
+  	private long value;
+  	synchronized long get(){
+    	return value;
+  	}
+  	synchronized long addOne(){
+    	return ++value;
+  	}
+}
+```
+
+#### 识别多个共享变量间的约束条件
+
+如果多个共享变量存在约束，一般需要用`if`来判断，很可能会出现**竞态条件**。例如下面的例子没法满足约束条件：
+
+```java
+//库存下限要小于库存上限
+public class SafeWM {
+  // 库存上限
+  private final AtomicLong upper = new AtomicLong(0);
+  // 库存下限
+  private final AtomicLong lower = new AtomicLong(0);
+  // 设置库存上限
+  void setUpper(long v){
+    // 检查参数合法性
+    if (v < lower.get()) {
+      throw new IllegalArgumentException();
+    }
+    upper.set(v);
+  }
+  // 设置库存下限
+  void setLower(long v){
+    // 检查参数合法性
+    if (v > upper.get()) {
+      throw new IllegalArgumentException();
+    }
+    lower.set(v);
+  }
+  // 省略其他业务代码
+}
+```
+
+假如原本上下限是(2,10)，如果两个线程同时执行了`setUpper(7)`和`setLower(5)`,它们都能通过校验语句，导致结果变成(7,5)不满足约束。
+
+<u>如何解决这个问题呢？</u>
+
+- 方法1：使用`synchronized`给`setLower`和`setUpper`加锁，牺牲性能。
+
+- 方法2：将上下限封装到一个对象中，一起操作：
+
+  ```java
+  public class Boundary {
+      private final lower;
+      private final upper;
+      //线程封闭，保证不会破坏约束
+      public Boundary(long lower, long upper) {
+          if(lower >= upper) {
+              // throw exception
+          }
+          this.lower = lower;
+          this.upper = upper;
+      }
+  }
+  public class SafeWM {
+      private volatile Boundary boundary;
+  	void setBoundary(Boundary boundary) {
+          this.boundary = boundary;
+      }
+      Boundary getBoundary() {
+          return this.boundary;
+      }
+  }
+  ```
+
+  
+
+#### 制定并发访问策略
+
+- **避免共享**：避免共享的技术主要是利于线程本地存储以及为每个任务分配独立的线程。
+
+- **不变模式**：这个在 Java 领域应用的很少，但在其他领域却有着广泛的应用，例如 Actor 模式、CSP 模式以及函数式编程的基础都是不变模式。
+- **管程及其他同步工具**：Java 领域万能的解决方案是管程，但是对于很多特定场景，使用 Java 并发包提供的读写锁、并发容器等同步工具会更好。
+
+
+
+## JDK并发工具类
+
+### JUC中的管程：Lock & Condition
+
+Java SDK 并发包通过 Lock 和 Condition 两个接口来实现管程，其中 **Lock 用于解决互斥问题，Condition 用于解决同步问题**。
+
+既然 Java 从语言层面已经实现了管程了，那为什么还要在 SDK 里提供另外一种实现呢？区别在哪里？
+
+
+
+### 信号量Semaphore
+
+
+
+### ReadWriteLock
+
+### StampedLock
+
+### CountDownLatch
+
+### CyclicBarrier
+
+### 并发容器
+
+### 原子类
+
+### Executor和线程池
 
 
 

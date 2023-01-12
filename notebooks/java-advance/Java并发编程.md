@@ -388,7 +388,7 @@ NOTE: `wait()`、`notify()`、`notifyAll()` 这三个方法**能够被调用的�
 
 
 
-<u>**等待-通知的编程范式**</u>：
+#### <u>**等待-通知的编程范式**</u>：
 
 ```java
 while(condition()) {
@@ -867,17 +867,92 @@ public class SafeWM {
 
 Java SDK 并发包通过 Lock 和 Condition 两个接口来实现管程，其中 **Lock 用于解决互斥问题，Condition 用于解决同步问题**。
 
-既然 Java 从语言层面已经实现了管程了，那为什么还要在 SDK 里提供另外一种实现呢？区别在哪里？
+<u>既然 Java 从语言层面已经实现了管程了，那为什么还要在 SDK 里提供另外一种实现呢？区别在哪里？</u>
+
+- `synchronized` 申请资源的时候，如果申请不到，线程直接进入阻塞状态了，而线程进入阻塞状态，啥都干不了，也释放不了线程已经占有的资源。容易导致死锁。
+
+- Lock接口做了以下优化：
+
+  - 能够响应中断`void lockInterruptibly() throws InterruptedException;`
+
+  - 支持超时`boolean tryLock(long time, TimeUnit unit) throws InterruptedException;`
+
+  - 非阻塞地获取锁`boolean tryLock();`
+
+    这几个特点可以弥补`synchronized`的不足，可以破坏导致死锁的“不可抢占”条件。
+
+- 另外，`synchronized`只能有一个条件变量，而`Condition`变量可以有多个。
+
+Lock锁的使用：
+
+```java
+public void fun() {
+    //加锁
+    lock.lock();  
+    try {
+        //do something
+      	value += 1;
+    } finally {
+      	// 保证锁能释放
+      	lock.unlock();
+    }
+}
+```
+
+#### ReentrantLock
+
+可重入锁，指的是线程可以重复获取同一把锁。
+
+#### 用锁的最佳实践
+
+- 永远只在更新对象的成员变量时加锁
+
+- 永远只在访问可变的成员变量时加锁
+- 永远不在调用其他对象的方法时加锁
 
 
 
-### 信号量Semaphore
+### 信号量：Semaphore
+
+#### 信号量模型
+
+一个计数器，一个等待队列，三个原子性的方法init()、down() 和 up()。
+
+![image-20230111154620643](./images/Java%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/image-20230111154620643.png)
+
+#### Semaphore
+
+在 Java SDK 并发包里，down() 和 up() 对应的则是 `acquire()` 和 `release()`。
+
+`Semaphore` 可以**允许多个线程访问一个临界区**，这是与`Lock`接口的区别。
+
+#### 使用场景
+
+限流器，比较常见的需求就是我们工作中遇到的各种池化资源，例如连接池、对象池、线程池等等。其中，你可能最熟悉数据库连接池，在同一时刻，一定是允许多个线程同时使用连接池的，当然，每个连接在被释放前，是不允许其他线程使用的。
 
 
 
 ### ReadWriteLock
 
+#### 读写锁
+
+所有的读写锁都遵守以下三条基本原则：
+
+- 允许多个线程同时读共享变量；
+- 只允许一个线程写共享变量；
+- 如果一个写线程正在执行写操作，此时禁止读线程读共享变量。
+
+#### 锁的升级降级
+
+JDK的`ReadWriteLock`只允许降级，不允许升级。
+
+只有写锁支持条件变量，读锁是不支持条件变量的，读锁调用 newCondition() 会抛出 UnsupportedOperationException 异常。
+
+
+
 ### StampedLock
+
+
 
 ### CountDownLatch
 

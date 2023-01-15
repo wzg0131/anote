@@ -368,3 +368,19 @@ docker build -t 镜像名 -f Dockerfile位置 指定构建的目录
 
 
 
+### 离线镜像
+
+保存：
+
+```shell
+docker save colorlightwzg/one-app:latest -o one-app.tar
+docker save colorlightwzg/one-app:latest > one-app.tar
+```
+
+导出：
+
+```shell
+docker load colorlightwzg/one-app:latest -i one-app.tar
+docker load colorlightwzg/one-app:latest < one-app.tar
+```
+

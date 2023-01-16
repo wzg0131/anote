@@ -60,6 +60,8 @@ Nexus 制品管理
 
 ## 流水线
 
+[流水线参考](https://www.bookstack.cn/read/jenkins/62f9cfc0b85e3818.md)
+
 Jenkinsfile参考例子：
 
 ```groovy

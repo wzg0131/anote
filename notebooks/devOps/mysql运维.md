@@ -25,6 +25,13 @@ mysqldump过滤条件：
 mysqldump -uroot -pkS4pKJF_3kfdsfOoJ ccloud wp_postmeta --where=" meta_key in ('_terminal_group','_terminal_led') " > /var/lib/mysql/wp_postmeta_beu.sql
 ```
 
+## mysql查看配置项
+
+```mysql
+#比如查看最大连接数
+show variables like 'max_connections';
+```
+
 
 
 ## 存储过程

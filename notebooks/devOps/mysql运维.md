@@ -78,3 +78,17 @@ BEGIN
 END
 ```
 
+mysql默认分隔符是`;`，一般会重新定义分隔符防止存储过程被分开：
+
+```mysql
+
+delimiter //
+CREATE PROCEDURE `hello`(IN n int)
+BEGIN
+存储过程代码
+END
+//
+
+CALL hello(100);
+```
+

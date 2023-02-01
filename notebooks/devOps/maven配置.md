@@ -73,6 +73,7 @@ mvn versions:update-child-modules
             <properties>
                 <profileActive>dev</profileActive>
             </properties>
+             <!-- 作为默认值 -->
             <activation>
                 <activeByDefault>true</activeByDefault>
             </activation>

@@ -358,6 +358,15 @@ docker run -d -p 9411:9411 -m 512M --name zipkin-server openzipkin/zipkin --zipk
 
 #nacos
 docker run --name nacos -e MODE=standalone -p 8848:8848 -d nacos/nacos-server:v2.1.2 --networks one-nw
+
+#NEXUS
+docker run -d  --restart=always \
+--name nexus3 \
+-p 8082:8081 \
+-v nexus-data:/nexus-data \
+-v /media/colorlight/sdb1/project_ccloud/nexus/storage:/sonatype-work/storage \
+--network one-nw \
+sonatype/nexus3
 ```
 
 ### docker build

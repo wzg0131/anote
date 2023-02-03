@@ -55,6 +55,8 @@ https://blog.51cto.com/lizhenliang/2363565
 
 ## Dockerfile参考
 
+例子：[Mysql的Dockerfile](https://github.com/docker-library/mysql/blob/223f0be1213bbd8647b841243a3114e8b34022f4/5.7/Dockerfile)
+
 ### springboot2.4+应用
 
 ```dockerfile
@@ -229,3 +231,6 @@ EXPOSE 80
 CMD ["nginx"]
 ```
 
+## Entrypoint.sh启动脚本
+
+例子：[Mysql的**docker-entrypoint.sh**](https://github.com/docker-library/mysql/blob/223f0be1213bbd8647b841243a3114e8b34022f4/8.0/docker-entrypoint.sh)

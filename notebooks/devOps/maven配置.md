@@ -2,6 +2,16 @@
 
 [toc]
 
+## 一些指令
+
+下载项目依赖的源码：
+
+```shell
+mvn dependency:resolve -Dclassifier=sources
+```
+
+
+
 ## pom.xml
 
 ### 更新父子工程版本号
@@ -40,6 +50,8 @@ mvn versions:update-child-modules
 ```
 
 ### 发布配置
+
+[maven配置自己的nexus](onenote:https://d.docs.live.net/7c3c219f14f2507d/文档/Jerry 的笔记本/2021年5月.one#maven配置自己的nexus&section-id={C9904E92-184E-45BB-A4C5-A345C9EACFDE}&page-id={FEE2D9F0-B200-4E79-A5F0-ECFB46ADEE82}&object-id={2889F4B5-8F73-4E3D-9615-C6365045DCFA}&10) ([Web 视图](https://onedrive.live.com/view.aspx?resid=7C3C219F14F2507D!296&id=documents&wd=target(2021年5月.one|C9904E92-184E-45BB-A4C5-A345C9EACFDE%2Fmaven配置自己的nexus|FEE2D9F0-B200-4E79-A5F0-ECFB46ADEE82%2F)))
 
 ```xml
     <distributionManagement>

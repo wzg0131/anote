@@ -43,6 +43,16 @@ jenkinsci/blueocean
 
 ### 邮件通知
 
+邮件模板：https://blog.csdn.net/wfanking/article/details/102497478
+
+### Nexus
+
+需要两个插件：Nexus Artifact Uploader，Pipeline Utility Steps
+
+https://cloud.tencent.com/developer/article/1523255
+
+https://www.jianshu.com/p/29403ecf7fc2
+
 ### 一些插件
 
 ```
@@ -62,7 +72,13 @@ Nexus 制品管理
 
 [流水线参考](https://www.bookstack.cn/read/jenkins/62f9cfc0b85e3818.md)
 
-Jenkinsfile参考例子：
+### stash&unstash
+
+[PIPELINE stash & unstash【解决不同阶段不同空间找不到jar的问题！！！！】](onenote:https://d.docs.live.net/7c3c219f14f2507d/文档/Jerry 的笔记本/21年6月.one#PIPELINE stash  unstash【解决不同阶段不同空间找不到jar的问题！！！！】&section-id={DCA07762-3585-48BC-A0A6-D5DCEFF1A2E0}&page-id={2209E251-0A0C-41E7-A3EA-B845D2EE5E72}&object-id={61E23882-DED8-4B77-A482-1DAFB32A5F51}&10) ([Web 视图](https://onedrive.live.com/view.aspx?resid=7C3C219F14F2507D!296&id=documents&wd=target(21年6月.one|DCA07762-3585-48BC-A0A6-D5DCEFF1A2E0%2FPIPELINE stash %26 unstash【解决不同阶段不同空间找不到jar的问题！！！！】|2209E251-0A0C-41E7-A3EA-B845D2EE5E72%2F)))
+
+
+
+### Jenkinsfile参考例子
 
 ```groovy
 pipeline {

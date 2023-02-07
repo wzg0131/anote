@@ -2,6 +2,22 @@
 
 [toc]
 
+## 常用指令
+
+### 重启组件
+
+```shell
+kubectl rollout restart deployment/ds/rs xxx
+```
+
+###  动态看状态
+
+```shell
+Kubectl get pod -w 
+```
+
+
+
 ## Examples
 
 ```yaml

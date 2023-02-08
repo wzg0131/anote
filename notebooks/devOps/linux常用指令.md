@@ -84,3 +84,20 @@ zarQlFtRNmbevGXr6t0Q1g==
 
 ```
 
+
+
+## 文件
+
+### grep
+
+限制行数：
+
+```shell
+#显示匹配行和上下各5行
+grep -C 5 "hello" a.txt
+#匹配行及后5行
+grep -B 5 "hello" a.txt
+#匹配行及前5行
+grep -A 5 "hello" a.txt
+```
+
